@@ -39,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
 
     public static String result;
 
+    public TextView pres1;
+    public TextView pres2;
+    public TextView pres3;
+    public TextView res_text;
+
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -61,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
         Button buttonOn = findViewById(R.id.buttonOn);
         Button buttonOff = findViewById(R.id.buttonOff);
         Button buttonTest = findViewById(R.id.buttonTestLeakage);
+        pres1 = findViewById(R.id.press1);
+        pres2 = findViewById(R.id.press2);
+        pres3 = findViewById(R.id.press3);
+        res_text = findViewById(R.id.resultText);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
@@ -279,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
 
             int i = 0;
+            String resultText;
 
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
@@ -292,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
+                    pres1.setText(String.valueOf(firstValue));
                 }
             });
             try {
@@ -301,12 +311,24 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
             secondValue = Integer.parseInt(result);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pres2.setText(String.valueOf(secondValue));
+                }
+            });
             try {
                 Thread.sleep(3*60000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             thirdValue = Integer.parseInt(result);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pres3.setText(String.valueOf(thirdValue));
+                }
+            });
 
             for(i=0; i<10; ++i){
                 connectedThread.write("s");
@@ -316,6 +338,16 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
             }
+            if(secondValue - thirdValue > firstValue * 0.05)
+                resultText = "There is a leakage in this system!\n";
+            else
+                resultText = "There is no leakage in this system!\n";
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    res_text.setText(resultText);
+                }
+            });
         }
     }
 }
