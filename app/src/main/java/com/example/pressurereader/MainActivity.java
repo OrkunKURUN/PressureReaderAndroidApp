@@ -19,7 +19,6 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
@@ -31,6 +30,19 @@ public class MainActivity extends AppCompatActivity {
     public static BluetoothSocket mmSocket;
     public static ConnectedThread connectedThread;
     public static CreateConnectThread createConnectThread;
+
+    public static TestLeakageThread testLeakageThread;
+
+    public static int firstValue = 0;
+    public static int secondValue = 0;
+    public static int thirdValue = 0;
+
+    public static String result;
+
+
+    public static BluetoothSocket getMmSocket() {
+        return mmSocket;
+    }
 
     // The following variables used in bluetooth handler to identify message status
     private final static int CONNECTION_STATUS = 1;
@@ -45,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
         final TextView bluetoothStatus = findViewById(R.id.textBluetoothStatus);
         Button buttonConnect = findViewById(R.id.buttonConnect);
         Button buttonDisconnect = findViewById(R.id.buttonDisconnect);
-        final TextView ledStatus = findViewById(R.id.textLedStatus);
+        final TextView sensorStatus = findViewById(R.id.textLedStatus);
         Button buttonOn = findViewById(R.id.buttonOn);
         Button buttonOff = findViewById(R.id.buttonOff);
-        Button buttonBlink = findViewById(R.id.buttonBlink);
+        Button buttonTest = findViewById(R.id.buttonTestLeakage);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +112,8 @@ public class MainActivity extends AppCompatActivity {
                     // If the updates come from the Thread for Data Exchange
                     case MESSAGE_READ:
                         String statusText = msg.obj.toString().replace("/n","");
-                        ledStatus.setText(statusText);
+                        sensorStatus.setText(statusText);
+                        result = sensorStatus.getText().toString().trim();
                         break;
                 }
             }
@@ -136,11 +149,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Code to make the LED blinking
-        buttonBlink.setOnClickListener(new View.OnClickListener() {
+        buttonTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String androidCmd = "d";
-                connectedThread.write(androidCmd);
+                testLeakageThread = new TestLeakageThread();
+                testLeakageThread.start();
             }
         });
     }
@@ -188,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
             // the connection in a separate thread.
             // Calling for the Thread for Data Exchange (see below)
             connectedThread = new ConnectedThread(mmSocket);
-            connectedThread.run();
+            connectedThread.start();
         }
 
         // Closes the client socket and causes the thread to finish.
@@ -253,6 +266,56 @@ public class MainActivity extends AppCompatActivity {
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) { }
+        }
+    }
+
+    /* =============================== Thread for Leakage Test ================================= */
+    public class TestLeakageThread extends Thread {
+
+        TestLeakageThread() {
+
+        }
+
+        public void run() {
+
+            int i = 0;
+
+            for(i=0; i<3; ++i){
+                connectedThread.write("w");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            firstValue = Integer.parseInt(result);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            });
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            secondValue = Integer.parseInt(result);
+            try {
+                Thread.sleep(3*60000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            thirdValue = Integer.parseInt(result);
+
+            for(i=0; i<10; ++i){
+                connectedThread.write("s");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 }
