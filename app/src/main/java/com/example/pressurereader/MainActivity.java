@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
                         String statusText = msg.obj.toString().replace("/n","");
                         sensorStatus.setText(statusText);
                         result = sensorStatus.getText().toString().trim();
+                        gauge.setValue(Integer.parseInt(result));
                         break;
                 }
             }
