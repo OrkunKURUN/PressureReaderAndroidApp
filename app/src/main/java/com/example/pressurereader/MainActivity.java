@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static android.content.ContentValues.TAG;
 
 import com.ekn.gruzer.gaugelibrary.HalfGauge;
+import com.ekn.gruzer.gaugelibrary.Range;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     public TextView pres3;
     public TextView res_text;
     public HalfGauge gauge;
+    public Range range;
+    public Range range2;
+    public Range range3;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -72,7 +77,34 @@ public class MainActivity extends AppCompatActivity {
         pres2 = findViewById(R.id.press2);
         pres3 = findViewById(R.id.press3);
         res_text = findViewById(R.id.resultText);
+
+        //Initializing gauge
         gauge = findViewById(R.id.pressureGauge);
+
+        range = new Range();
+        range.setColor(Color.parseColor("#ce0000"));
+        range.setFrom(0.0);
+        range.setTo(256.0);
+
+        range2 = new Range();
+        range2.setColor(Color.parseColor("#E3E500"));
+        range2.setFrom(256.0);
+        range2.setTo(768.0);
+
+        range3 = new Range();
+        range3.setColor(Color.parseColor("##00b20b"));
+        range3.setFrom(768.0);
+        range3.setTo(1024.0);
+
+        //add color ranges to gauge
+        gauge.addRange(range);
+        gauge.addRange(range2);
+        gauge.addRange(range3);
+
+        //set min max and current value
+        gauge.setMinValue(0.0);
+        gauge.setMaxValue(1024.0);
+        gauge.setValue(0.0);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
