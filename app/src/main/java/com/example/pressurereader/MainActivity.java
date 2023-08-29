@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         range2.setTo(768.0);
 
         range3 = new Range();
-        range3.setColor(Color.parseColor("##00b20b"));
+        range3.setColor(Color.parseColor("#00b20b"));
         range3.setFrom(768.0);
         range3.setTo(1024.0);
 
