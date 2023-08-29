@@ -158,7 +158,10 @@ public class MainActivity extends AppCompatActivity {
                         String statusText = msg.obj.toString().replace("/n","");
                         sensorStatus.setText(statusText);
                         result = sensorStatus.getText().toString().trim();
-                        gauge.setValue(Integer.parseInt(result));
+                        if(isNumeric(result))
+                            gauge.setValue(Integer.parseInt(result));
+                        else
+                            gauge.setValue(0);
                         break;
                 }
             }
@@ -385,5 +388,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }
