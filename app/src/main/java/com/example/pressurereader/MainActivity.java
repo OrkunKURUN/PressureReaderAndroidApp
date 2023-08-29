@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
 
+import com.ekn.gruzer.gaugelibrary.HalfGauge;
+
 public class MainActivity extends AppCompatActivity {
 
     private String deviceAddress = null;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public TextView pres2;
     public TextView pres3;
     public TextView res_text;
-
+    public HalfGauge gauge;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         pres2 = findViewById(R.id.press2);
         pres3 = findViewById(R.id.press3);
         res_text = findViewById(R.id.resultText);
+        gauge = findViewById(R.id.pressureGauge);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
