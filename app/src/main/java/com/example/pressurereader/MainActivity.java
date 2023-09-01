@@ -386,8 +386,8 @@ public class MainActivity extends AppCompatActivity {
             firstValue = gauge.getValue();
             fourthValue = gauge.getValue();
 
-            //if((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
-            if((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
+            while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
+            //while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
                 for(i=0; i<10; ++i){
                     connectedThread.write("s");
                     try {
@@ -396,11 +396,7 @@ public class MainActivity extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                 }
-                resultText = "Front axle pressure is not half of the system pressure!\n";
-                res_text.setText(resultText);
-                timeCountdownThread.interrupt();
-
-                return;
+                res_text.setText("Front axle pressure is not half of the system pressure!\n");
             }
             runOnUiThread(new Runnable() {
                 @Override
@@ -455,7 +451,6 @@ public class MainActivity extends AppCompatActivity {
                     leakageRatio.setText(String.valueOf(ratio));
                 }
             });
-            timeCountdownThread.interrupt();
         }
     }
 
@@ -464,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
         public void run(){
             long elapsedTime = 0;
             long startTime = System.currentTimeMillis();
-            while (elapsedTime < 3*60*1000){
+            while (elapsedTime < 4*60*1000){
                 elapsedTime = System.currentTimeMillis() - startTime;
                 //timeGauge.setValue(elapsedTime);
                 double elapsedTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(elapsedTime) + (double)(TimeUnit.MILLISECONDS.toSeconds(elapsedTime)%60)/100;
