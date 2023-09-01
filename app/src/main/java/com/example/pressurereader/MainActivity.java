@@ -96,17 +96,17 @@ public class MainActivity extends AppCompatActivity {
         range = new Range();
         range.setColor(Color.parseColor("#ce0000"));
         range.setFrom(0.0);
-        range.setTo(256.0);
+        range.setTo(7.5);
 
         range2 = new Range();
         range2.setColor(Color.parseColor("#E3E500"));
-        range2.setFrom(256.0);
-        range2.setTo(768.0);
+        range2.setFrom(7.5);
+        range2.setTo(22.5);
 
         range3 = new Range();
         range3.setColor(Color.parseColor("#00b20b"));
-        range3.setFrom(768.0);
-        range3.setTo(1024.0);
+        range3.setFrom(22.5);
+        range3.setTo(30.0);
 
         //add color ranges to gauge
         gauge.addRange(range);
@@ -119,11 +119,11 @@ public class MainActivity extends AppCompatActivity {
 
         //set min max and current value
         gauge.setMinValue(0.0);
-        gauge.setMaxValue(1024.0);
+        gauge.setMaxValue(30.0);
         gauge.setValue(0.0);
 
         gauge2.setMinValue(0.0);
-        gauge2.setMaxValue(1024.0);
+        gauge2.setMaxValue(30.0);
         gauge2.setValue(0.0);
 
         timeGauge.setMinValue(0.0);
@@ -183,8 +183,13 @@ public class MainActivity extends AppCompatActivity {
                         result = sensorStatus.getText().toString().trim();
                         if(isNumeric(result)){
                             resultNum = Integer.parseInt(result);
-                            gauge2.setValue(resultNum % 10000);
-                            gauge.setValue(resultNum / 10000);
+                            double res1 = ((double)(resultNum % 10000))/1024*30;
+                            res1 = Math.round(res1*100)/100.0;
+                            double res2 = ((double)(resultNum / 10000))/1024*30;
+                            res2 = Math.round(res2*100)/100.0;
+                            gauge2.setValue(res1);
+                            gauge.setValue(res2);
+                            sensorStatus.setText(String.valueOf(res2));
                         }
                         else{
                             gauge.setValue(0);
@@ -357,6 +362,12 @@ public class MainActivity extends AppCompatActivity {
             int i = 0;
             String resultText;
 
+            pres1.setText("");
+            pres2.setText("");
+            pres3.setText("");
+            leakage.setText("");
+            leakageRatio.setText("");
+
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
                 try {
@@ -440,8 +451,7 @@ public class MainActivity extends AppCompatActivity {
                     res_text.setText(resultText);
                     leakage.setText(String.valueOf(firstValue - thirdValue));
                     double ratio = (firstValue - thirdValue)/firstValue;
-                    ratio = Math.round(ratio*10000);
-                    leakageRatio.setText(String.valueOf(ratio/10000));
+                    leakageRatio.setText(String.valueOf(ratio));
                 }
             });
         }
