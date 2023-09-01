@@ -21,9 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.ContentValues.TAG;
 
+import com.ekn.gruzer.gaugelibrary.FullGauge;
 import com.ekn.gruzer.gaugelibrary.HalfGauge;
 import com.ekn.gruzer.gaugelibrary.Range;
 
@@ -37,17 +39,23 @@ public class MainActivity extends AppCompatActivity {
 
     public static TestLeakageThread testLeakageThread;
 
-    public static int firstValue = 0;
-    public static int secondValue = 0;
-    public static int thirdValue = 0;
+    public static double firstValue = 0;
+    public static double secondValue = 0;
+    public static double thirdValue = 0;
+    public static double fourthValue = 0;
 
     public static String result;
+    public int resultNum;
 
     public TextView pres1;
     public TextView pres2;
     public TextView pres3;
     public TextView res_text;
+    public TextView leakage;
+    public TextView leakageRatio;
     public HalfGauge gauge;
+    public HalfGauge gauge2;
+    public FullGauge timeGauge;
     public Range range;
     public Range range2;
     public Range range3;
@@ -77,9 +85,13 @@ public class MainActivity extends AppCompatActivity {
         pres2 = findViewById(R.id.press2);
         pres3 = findViewById(R.id.press3);
         res_text = findViewById(R.id.resultText);
+        leakage = findViewById(R.id.leakage);
+        leakageRatio = findViewById(R.id.leakInitRatio);
+        timeGauge = findViewById(R.id.timerGauge);
 
         //Initializing gauge
         gauge = findViewById(R.id.pressureGauge);
+        gauge2 = findViewById(R.id.pressure2Gauge);
 
         range = new Range();
         range.setColor(Color.parseColor("#ce0000"));
@@ -101,10 +113,21 @@ public class MainActivity extends AppCompatActivity {
         gauge.addRange(range2);
         gauge.addRange(range3);
 
+        gauge2.addRange(range);
+        gauge2.addRange(range2);
+        gauge2.addRange(range3);
+
         //set min max and current value
         gauge.setMinValue(0.0);
         gauge.setMaxValue(1024.0);
         gauge.setValue(0.0);
+
+        gauge2.setMinValue(0.0);
+        gauge2.setMaxValue(1024.0);
+        gauge2.setValue(0.0);
+
+        timeGauge.setMinValue(0.0);
+        timeGauge.setMaxValue(3.0);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
@@ -158,10 +181,15 @@ public class MainActivity extends AppCompatActivity {
                         String statusText = msg.obj.toString().replace("/n","");
                         sensorStatus.setText(statusText);
                         result = sensorStatus.getText().toString().trim();
-                        if(isNumeric(result))
-                            gauge.setValue(Integer.parseInt(result));
-                        else
+                        if(isNumeric(result)){
+                            resultNum = Integer.parseInt(result);
+                            gauge2.setValue(resultNum % 10000);
+                            gauge.setValue(resultNum / 10000);
+                        }
+                        else{
                             gauge.setValue(0);
+                            gauge2.setValue(0);
+                        }
                         break;
                 }
             }
@@ -332,12 +360,19 @@ public class MainActivity extends AppCompatActivity {
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
                 try {
-                    Thread.sleep(500);
+                    this.sleep(500);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
-            firstValue = Integer.parseInt(result);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
+            timeCountdownThread.start();
+            firstValue = gauge.getValue();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -345,11 +380,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             try {
-                Thread.sleep(60000);
+                Thread.sleep(60000, 1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            secondValue = Integer.parseInt(result);
+            secondValue = gauge.getValue();
+            fourthValue = gauge2.getValue();
+
+            //if((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
+            if((fourthValue < secondValue*0.95) || (fourthValue > secondValue*1.05)){ //4th value: 2nd sensor
+                for(i=0; i<10; ++i){
+                    connectedThread.write("s");
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                resultText = "Front axle pressure is not half of the system pressure!\n";
+                res_text.setText(resultText);
+                timeCountdownThread.interrupt();
+
+                return;
+            }
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -357,11 +410,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             try {
-                Thread.sleep(3*60000);
+                Thread.sleep(120000, 1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            thirdValue = Integer.parseInt(result);
+            thirdValue = gauge.getValue();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -385,8 +438,26 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     res_text.setText(resultText);
+                    leakage.setText(String.valueOf(firstValue - thirdValue));
+                    double ratio = (firstValue - thirdValue)/firstValue;
+                    ratio = Math.round(ratio*10000);
+                    leakageRatio.setText(String.valueOf(ratio/10000));
                 }
             });
+        }
+    }
+
+    public class TimeCountdownThread extends Thread {
+        TimeCountdownThread(){}
+        public void run(){
+            long elapsedTime = 0;
+            long startTime = System.currentTimeMillis();
+            while (elapsedTime < 3*60*1000){
+                elapsedTime = System.currentTimeMillis() - startTime;
+                //timeGauge.setValue(elapsedTime);
+                double elapsedTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(elapsedTime) + (double)(TimeUnit.MILLISECONDS.toSeconds(elapsedTime)%60)/100;
+                timeGauge.setValue(elapsedTimeMinutes);
+            }
         }
     }
 

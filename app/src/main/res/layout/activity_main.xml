@@ -24,6 +24,11 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent" />
+        <com.ekn.gruzer.gaugelibrary.HalfGauge
+            android:id="@+id/pressure2Gauge"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -50,6 +55,16 @@
             android:layout_weight="1"
             android:fontFamily="monospace"
             android:text="Elapsed Time"
+            android:textAlignment="center"
+            android:textColor="#004aad"
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="monospace"
+            android:text="Pressure2"
             android:textAlignment="center"
             android:textColor="#004aad"
             android:textSize="16sp" />
@@ -119,21 +134,22 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="5dp"
+            android:layout_weight="0.3"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_margin="5dp"
-                android:layout_weight="0.8"
+                android:layout_weight="1"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textLedStatus"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="5"
                     android:fontFamily="monospace"
                     android:text="TextView"
@@ -148,7 +164,7 @@
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="5"
                     android:orientation="horizontal">
 
@@ -285,6 +301,47 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Leakage"
+                    android:textColor="#004aad"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace" />
+
+                <TextView
+                    android:id="@+id/leakage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Leak/Init. Pr. Ratio"
+                    android:textColor="#004aad"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace" />
+
+                <TextView
+                    android:id="@+id/leakInitRatio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <TextView
