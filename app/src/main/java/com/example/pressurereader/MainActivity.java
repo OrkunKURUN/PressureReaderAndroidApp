@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         gauge2.setValue(0.0);
 
         timeGauge.setMinValue(0.0);
-        timeGauge.setMaxValue(3.0);
+        timeGauge.setMaxValue(4.0);
 
         // Code for the "Connect" button
         buttonConnect.setOnClickListener(new View.OnClickListener() {
@@ -384,22 +384,10 @@ public class MainActivity extends AppCompatActivity {
             TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
             timeCountdownThread.start();
             firstValue = gauge.getValue();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    pres1.setText(String.valueOf(firstValue));
-                }
-            });
-            try {
-                Thread.sleep(60000, 1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            secondValue = gauge.getValue();
-            fourthValue = gauge2.getValue();
+            fourthValue = gauge.getValue();
 
             //if((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
-            if((fourthValue < secondValue*0.95) || (fourthValue > secondValue*1.05)){ //4th value: 2nd sensor
+            if((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
                 for(i=0; i<10; ++i){
                     connectedThread.write("s");
                     try {
@@ -417,11 +405,23 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    pres1.setText(String.valueOf(firstValue));
+                }
+            });
+            try {
+                Thread.sleep(60000, 1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            secondValue = gauge.getValue();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
                     pres2.setText(String.valueOf(secondValue));
                 }
             });
             try {
-                Thread.sleep(120000, 1);
+                Thread.sleep(180000, 1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -449,11 +449,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     res_text.setText(resultText);
-                    leakage.setText(String.valueOf(firstValue - thirdValue));
-                    double ratio = (firstValue - thirdValue)/firstValue;
+                    double leak = Math.round((firstValue - thirdValue)*100)/100.0;
+                    leakage.setText(String.valueOf(leak));
+                    double ratio = Math.round((firstValue - thirdValue)/firstValue*100)/100.0;
                     leakageRatio.setText(String.valueOf(ratio));
                 }
             });
+            timeCountdownThread.interrupt();
         }
     }
 

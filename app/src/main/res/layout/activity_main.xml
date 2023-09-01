@@ -290,7 +290,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="monospace"
-                    android:text="3rd minute pressure"
+                    android:text="4th minute pressure"
                     android:textColor="#004aad"
                     android:textSize="20sp"
                     android:textStyle="bold" />
