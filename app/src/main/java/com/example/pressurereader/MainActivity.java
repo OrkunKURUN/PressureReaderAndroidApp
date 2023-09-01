@@ -388,14 +388,6 @@ public class MainActivity extends AppCompatActivity {
 
             while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
             //while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
-                for(i=0; i<10; ++i){
-                    connectedThread.write("s");
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
                 res_text.setText("Front axle pressure is not half of the system pressure!\n");
             }
             runOnUiThread(new Runnable() {
