@@ -381,8 +381,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
-            timeCountdownThread.start();
+
             firstValue = gauge.getValue();
             fourthValue = gauge.getValue();
 
@@ -396,6 +395,8 @@ public class MainActivity extends AppCompatActivity {
                     pres1.setText(String.valueOf(firstValue));
                 }
             });
+            TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
+            timeCountdownThread.start();
             try {
                 Thread.sleep(60000, 1);
             } catch (InterruptedException e) {
@@ -455,6 +456,7 @@ public class MainActivity extends AppCompatActivity {
                 elapsedTime = System.currentTimeMillis() - startTime;
                 //timeGauge.setValue(elapsedTime);
                 double elapsedTimeMinutes = TimeUnit.MILLISECONDS.toMinutes(elapsedTime) + (double)(TimeUnit.MILLISECONDS.toSeconds(elapsedTime)%60)/100;
+                elapsedTimeMinutes = Math.round(elapsedTimeMinutes*100)/100.0;
                 timeGauge.setValue(elapsedTimeMinutes);
             }
         }
