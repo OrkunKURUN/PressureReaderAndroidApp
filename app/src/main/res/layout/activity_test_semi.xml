@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:background="#E5FBF8"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".TestSemiActivity">
 
     <LinearLayout
         android:layout_width="wrap_content"

@@ -51,7 +51,7 @@ public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         itemHolder.textName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, MainActivity.class);
+                Intent intent = new Intent(context, TestSemiActivity.class);
                 intent.putExtra("deviceAddress",deviceAddress);
                 context.startActivity(intent);
             }

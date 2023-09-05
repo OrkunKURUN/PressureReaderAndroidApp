@@ -29,7 +29,7 @@ import com.ekn.gruzer.gaugelibrary.FullGauge;
 import com.ekn.gruzer.gaugelibrary.HalfGauge;
 import com.ekn.gruzer.gaugelibrary.Range;
 
-public class MainActivity extends AppCompatActivity {
+public class TestSemiActivity extends AppCompatActivity {
 
     private String deviceAddress = null;
     public static Handler handler;
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_test_semi);
 
         // Instantiate UI
         final TextView bluetoothStatus = findViewById(R.id.textBluetoothStatus);
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // This is the code to move to another screen
-                Intent intent = new Intent(MainActivity.this, SelectDeviceActivity.class);
+                Intent intent = new Intent(TestSemiActivity.this, SelectDeviceActivity.class);
                 startActivity(intent);
             }
         });
