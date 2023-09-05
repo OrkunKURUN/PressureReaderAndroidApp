@@ -23,7 +23,7 @@
         android:theme="@style/Theme.PressureReader"
         tools:targetApi="31">
         <activity
-            android:name=".TestSemiActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +32,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SelectDeviceActivity" android:label="Device List" />
+        <activity android:name=".TestSemiActivity" />
     </application>
 
 </manifest>
