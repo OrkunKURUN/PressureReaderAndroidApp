@@ -33,6 +33,7 @@
         </activity>
         <activity android:name=".SelectDeviceActivity" android:label="Device List" />
         <activity android:name=".TestSemiActivity" />
+        <activity android:name=".TestBothActivity" />
     </application>
 
 </manifest>
