@@ -52,8 +52,13 @@ public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, TestSemiActivity.class);
+                Intent intent2 = new Intent(context, TestBothActivity.class);
                 intent.putExtra("deviceAddress",deviceAddress);
-                context.startActivity(intent);
+                intent2.putExtra("deviceAddress",deviceAddress);
+                if (MainActivity.getTestActivity() == 1)
+                    context.startActivity(intent);
+                else
+                    context.startActivity(intent2);
             }
         });
 

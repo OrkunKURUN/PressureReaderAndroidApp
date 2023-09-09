@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#E5FBF8">
 
     <ImageView
         android:id="@+id/imageView"
@@ -18,19 +19,31 @@
         android:layout_weight="2"
         android:text="PRESSURE READER APP"
         android:textAlignment="center"
-        android:textSize="42sp" />
+        android:textSize="42sp"
+        android:fontFamily="monospace"
+        android:textColor="#004aad"/>
 
-    <Button
+    <android.widget.Button
         android:id="@+id/testSemi"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text=" TEST SEMI ONLY" />
+        android:text=" TEST SEMI ONLY"
+        android:background="@drawable/buttonshape"
+        android:shadowColor="#6096FF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="5"/>
 
-    <Button
+    <android.widget.Button
         android:id="@+id/testBoth"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="TEST SEMI AND TRAILER" />
+        android:text="TEST SEMI AND TRAILER"
+        android:background="@drawable/buttonshape"
+        android:shadowColor="#6096FF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="5"/>
 </LinearLayout>

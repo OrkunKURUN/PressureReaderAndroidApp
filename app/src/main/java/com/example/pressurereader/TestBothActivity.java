@@ -34,8 +34,8 @@ public class TestBothActivity extends AppCompatActivity {
     private String deviceAddress = null;
     public static Handler handler;
     public static BluetoothSocket mmSocket;
-    public static TestSemiActivity.ConnectedThread connectedThread;
-    public static TestSemiActivity.CreateConnectThread createConnectThread;
+    public static ConnectedThread connectedThread;
+    public static CreateConnectThread createConnectThread;
 
     public static TestLeakageThread testLeakageThread;
 
@@ -64,6 +64,8 @@ public class TestBothActivity extends AppCompatActivity {
     public Range range;
     public Range range2;
     public Range range3;
+    public Button contButton;
+    public Button buttonTest;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -85,7 +87,8 @@ public class TestBothActivity extends AppCompatActivity {
         final TextView sensorStatus = findViewById(R.id.textLedStatus);
         Button buttonOn = findViewById(R.id.buttonOn);
         Button buttonOff = findViewById(R.id.buttonOff);
-        Button buttonTest = findViewById(R.id.buttonTestLeakage);
+        buttonTest = findViewById(R.id.buttonTestLeakage);
+        contButton = findViewById(R.id.buttonContinue);
         pres1 = findViewById(R.id.press1);
         pres2 = findViewById(R.id.press2);
         pres3 = findViewById(R.id.press3);
@@ -157,7 +160,7 @@ public class TestBothActivity extends AppCompatActivity {
             to create bluetooth connection to the selected device using the device Address
              */
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            createConnectThread = new TestSemiActivity.CreateConnectThread(bluetoothAdapter,deviceAddress);
+            createConnectThread = new CreateConnectThread(bluetoothAdapter,deviceAddress);
             createConnectThread.start();
         }
 
@@ -247,6 +250,117 @@ public class TestBothActivity extends AppCompatActivity {
         });
     }
 
+    /* ============================ Thread to Create Connection ================================= */
+    public static class CreateConnectThread extends Thread {
+
+        @SuppressLint("MissingPermission")
+        public CreateConnectThread(BluetoothAdapter bluetoothAdapter, String address) {
+            // Opening connection socket with the Arduino board
+            BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
+            BluetoothSocket tmp = null;
+            UUID uuid;
+            uuid = bluetoothDevice.getUuids()[0].getUuid();
+            try {
+                // Get a BluetoothSocket to connect with the given BluetoothDevice.
+                // MY_UUID is the app's UUID string, also used in the server code.
+                tmp = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid);
+            } catch (IOException e) {
+                Log.e(TAG, "Socket's create() method failed", e);
+            }
+            mmSocket = tmp;
+        }
+
+        @SuppressLint("MissingPermission")
+        public void run() {
+            // Cancel discovery because it otherwise slows down the connection.
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            bluetoothAdapter.cancelDiscovery();
+            try {
+                // Connect to the Arduino board through the socket. This call blocks
+                // until it succeeds or throws an exception.
+                mmSocket.connect();
+                handler.obtainMessage(CONNECTION_STATUS, 1, -1).sendToTarget();
+            } catch (IOException connectException) {
+                // Unable to connect; close the socket and return.
+                try {
+                    mmSocket.close();
+                    handler.obtainMessage(CONNECTION_STATUS, -1, -1).sendToTarget();
+                } catch (IOException closeException) { }
+                return;
+            }
+
+            // The connection attempt succeeded. Perform work associated with
+            // the connection in a separate thread.
+            // Calling for the Thread for Data Exchange (see below)
+            connectedThread = new ConnectedThread(mmSocket);
+            connectedThread.start();
+        }
+
+        // Closes the client socket and causes the thread to finish.
+        // Disconnect from Arduino board
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
+    }
+
+    /* =============================== Thread for Data Exchange ================================= */
+    public static class ConnectedThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+
+        // Getting Input and Output Stream when connected to Arduino Board
+        public ConnectedThread(BluetoothSocket socket) {
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) { }
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+
+        // Read message from Arduino device and send it to handler in the Main Thread
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes = 0; // bytes returned from read()
+            // Keep listening to the InputStream until an exception occurs
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    buffer[bytes] = (byte) mmInStream.read();
+                    String arduinoMsg = null;
+
+                    // Parsing the incoming data stream
+                    if (buffer[bytes] == '\n'){
+                        arduinoMsg = new String(buffer,0,bytes);
+                        Log.e("Arduino Message",arduinoMsg);
+                        handler.obtainMessage(MESSAGE_READ,arduinoMsg).sendToTarget();
+                        bytes = 0;
+                    } else {
+                        bytes++;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        }
+
+        // Send command to Arduino Board
+        // This method must be called from Main Thread
+        public void write(String input) {
+            byte[] bytes = input.getBytes(); //converts entered String into bytes
+            try {
+                mmOutStream.write(bytes);
+            } catch (IOException e) { }
+        }
+    }
+
     /* =============================== Thread for Leakage Test ================================= */
     public class TestLeakageThread extends Thread {
 
@@ -268,6 +382,7 @@ public class TestBothActivity extends AppCompatActivity {
             presT3.setText("");
             leakage.setText("");
             leakageSemi.setText("");
+            boolean contTest = false;
 
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
@@ -332,59 +447,86 @@ public class TestBothActivity extends AppCompatActivity {
             });
             finalBoth = firstValue - thirdValue + fourthValue - sixthValue;
 
-            pres1.setText("");
-            pres2.setText("");
-            pres3.setText("");
-            presT1.setText("");
-            presT2.setText("");
-            presT3.setText("");
-
-            firstValue = gauge.getValue();
-            runOnUiThread(new Runnable() {
+            contButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void run() {
-                    pres1.setText(String.valueOf(firstValue));
+                public void onClick(View view) {
+                    String resultText = null;
+
+                    pres1.setText("");
+                    pres2.setText("");
+                    pres3.setText("");
+                    presT1.setText("");
+                    presT2.setText("");
+                    presT3.setText("");
+
+                    firstValue = gauge.getValue();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            pres1.setText(String.valueOf(firstValue));
+                        }
+                    });
+                    TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
+                    timeCountdownThread.start();
+                    try {
+                        Thread.sleep(60000, 1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    secondValue = gauge.getValue();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            pres2.setText(String.valueOf(secondValue));
+                        }
+                    });
+                    try {
+                        Thread.sleep(180000, 1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    thirdValue = gauge.getValue();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            double leak = Math.round((firstValue - thirdValue)*100)/100.0;
+                            leakageSemi.setText(String.valueOf(leak));
+                        }
+                    });
+                    double finalSemi = firstValue - thirdValue;
+                    double finalTrailer = finalBoth - finalSemi;
+
+                    if(finalBoth < (firstValue + thirdValue)*0.95){
+                        if (finalSemi < firstValue*0.95){
+                            resultText = "Semi is leaking.\n";
+                        }
+                        if(finalTrailer < fourthValue*0.95){
+                            resultText = resultText + " Trailer is leaking\n";
+                        }
+                    }
+                    else {
+                        resultText = "No leakage\n";
+                    }
+                    String finalResultText = resultText;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            res_text.setText(finalResultText);
+                        }
+                    });
+
+                    for(int i=0; i<10; ++i){
+                        connectedThread.write("s");
+                        try {pres3.setText(String.valueOf(thirdValue));
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             });
-            timeCountdownThread = new TimeCountdownThread();
-            timeCountdownThread.start();
-            try {
-                Thread.sleep(60000, 1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            secondValue = gauge.getValue();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    pres2.setText(String.valueOf(secondValue));
-                }
-            });
-            try {
-                Thread.sleep(180000, 1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            thirdValue = gauge.getValue();
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    double leak = Math.round((firstValue - thirdValue)*100)/100.0;
-                    leakageSemi.setText(String.valueOf(leak));
-                }
-            });
-            finalSemi = firstValue - thirdValue;
-            finalTrailer = finalBoth - finalSemi;
-
-            for(i=0; i<10; ++i){
-                connectedThread.write("s");
-                try {pres3.setText(String.valueOf(thirdValue));
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
 
         }
     }

@@ -214,6 +214,21 @@
                         android:shadowRadius="5"
                         android:text="TEST LEAK"
                         android:textColor="#EFFFF8" />
+
+                    <android.widget.Button
+                        android:id="@+id/buttonContinue"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+
+                        android:background="@drawable/buttonshape"
+
+                        android:shadowColor="#6096FF"
+                        android:shadowDx="0"
+                        android:shadowDy="0"
+                        android:shadowRadius="5"
+                        android:text="CONTINUE"
+                        android:textColor="#EFFFF8" />
                 </LinearLayout>
 
             </LinearLayout>
