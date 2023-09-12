@@ -15,6 +15,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class TestSemiActivity extends AppCompatActivity {
     public Range range;
     public Range range2;
     public Range range3;
+    public boolean isLeaking;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -88,6 +90,8 @@ public class TestSemiActivity extends AppCompatActivity {
         leakage = findViewById(R.id.leakage);
         leakageRatio = findViewById(R.id.leakInitRatio);
         timeGauge = findViewById(R.id.timerGauge);
+        EditText plate = findViewById(R.id.plateInput);
+        Button save = findViewById(R.id.saveRecord);
 
         //Initializing gauge
         gauge = findViewById(R.id.pressureGauge);
@@ -235,6 +239,13 @@ public class TestSemiActivity extends AppCompatActivity {
             public void onClick(View view) {
                 testLeakageThread = new TestLeakageThread();
                 testLeakageThread.start();
+            }
+        });
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String id = ""; //Later, id is going to be assigned automatically from Firebase
+                Vehicle vehicle = new Vehicle(plate.getText().toString(), id, 0, isLeaking);
             }
         });
     }
@@ -430,10 +441,14 @@ public class TestSemiActivity extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
             }
-            if(secondValue - thirdValue > firstValue * 0.05)
-                resultText = "There is a leakage in this system!\n";
-            else
-                resultText = "There is no leakage in this system!\n";
+            if(secondValue - thirdValue > firstValue * 0.05){
+                resultText = "System leaking!\n";
+                isLeaking = true;
+            }
+            else{
+                resultText = "System not leaking.\n";
+                isLeaking = false;
+            }
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
