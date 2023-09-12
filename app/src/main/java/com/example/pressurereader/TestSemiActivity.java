@@ -1,5 +1,6 @@
 package com.example.pressurereader;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -29,6 +30,11 @@ import static android.content.ContentValues.TAG;
 import com.ekn.gruzer.gaugelibrary.FullGauge;
 import com.ekn.gruzer.gaugelibrary.HalfGauge;
 import com.ekn.gruzer.gaugelibrary.Range;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class TestSemiActivity extends AppCompatActivity {
 
@@ -61,6 +67,7 @@ public class TestSemiActivity extends AppCompatActivity {
     public Range range2;
     public Range range3;
     public boolean isLeaking;
+    private DatabaseReference rDatabase;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -244,8 +251,22 @@ public class TestSemiActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id = ""; //Later, id is going to be assigned automatically from Firebase
-                Vehicle vehicle = new Vehicle(plate.getText().toString(), id, 0, isLeaking);
+                String sPlate = plate.getText().toString();
+                rDatabase = FirebaseDatabase.getInstance().getReference().child("vehicles").child(sPlate);
+                String id = rDatabase.push().getKey();//getting unique id
+                Vehicle vehicle = new Vehicle(sPlate, id, 0, isLeaking);
+                ValueEventListener listener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        rDatabase.setValue(vehicle);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w("TAG", "loadPost:onCancelled", error.toException());
+                    }
+                };
+                rDatabase.addValueEventListener(listener);
             }
         });
     }
@@ -378,6 +399,7 @@ public class TestSemiActivity extends AppCompatActivity {
             pres3.setText("");
             leakage.setText("");
             leakageRatio.setText("");
+            res_text.setText("");
 
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
@@ -396,9 +418,9 @@ public class TestSemiActivity extends AppCompatActivity {
             firstValue = gauge.getValue();
             fourthValue = gauge.getValue();
 
-            while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
-            //while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
-                res_text.setText("Front axle pressure is not half of the system pressure!\n");
+            //while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
+            while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
+                res_text.setText("Front pressure is not half of the system pressure!\n");
             }
             runOnUiThread(new Runnable() {
                 @Override
