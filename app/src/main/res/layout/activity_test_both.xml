@@ -205,6 +205,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
+                        android:layout_marginRight="7dp"
 
                         android:background="@drawable/buttonshape"
 
@@ -417,7 +418,7 @@
                 android:layout_weight="1"
                 android:fontFamily="monospace"
                 android:textColor="#004aad"
-                android:textSize="34sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

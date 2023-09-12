@@ -66,6 +66,7 @@ public class TestBothActivity extends AppCompatActivity {
     public Range range3;
     public Button contButton;
     public Button buttonTest;
+    public boolean contTest;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -244,10 +245,13 @@ public class TestBothActivity extends AppCompatActivity {
         buttonTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                contTest = false;
                 testLeakageThread = new TestLeakageThread();
                 testLeakageThread.start();
             }
         });
+
+        contButton.getLayoutParams();
     }
 
     /* ============================ Thread to Create Connection ================================= */
@@ -371,7 +375,7 @@ public class TestBothActivity extends AppCompatActivity {
         public void run() {
 
             int i = 0;
-            String resultText, resultText2;
+            String resultText = null, resultText2;
             double finalBoth, finalSemi, finalTrailer;
 
             pres1.setText("");
@@ -382,7 +386,7 @@ public class TestBothActivity extends AppCompatActivity {
             presT3.setText("");
             leakage.setText("");
             leakageSemi.setText("");
-            boolean contTest = false;
+            final boolean[] contTest = {false};
 
             for(i=0; i<3; ++i){
                 connectedThread.write("w");
@@ -445,88 +449,96 @@ public class TestBothActivity extends AppCompatActivity {
                     leakage.setText(String.valueOf(leak));
                 }
             });
-            finalBoth = firstValue - thirdValue + fourthValue - sixthValue;
+            finalBoth = thirdValue + sixthValue;
 
-            contButton.setOnClickListener(new View.OnClickListener() {
+            while (!contTest[0]){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                contButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        contTest[0] = true;
+                    }
+                });
+            }
+
+            //Sadece çekici ölçümü
+
+            pres1.setText("");
+            pres2.setText("");
+            pres3.setText("");
+            presT1.setText("");
+            presT2.setText("");
+            presT3.setText("");
+
+            firstValue = gauge.getValue();
+            runOnUiThread(new Runnable() {
                 @Override
-                public void onClick(View view) {
-                    String resultText = null;
+                public void run() {
+                    pres1.setText(String.valueOf(firstValue));
+                }
+            });
+            timeCountdownThread = new TimeCountdownThread();
+            timeCountdownThread.start();
+            try {
+                Thread.sleep(60000, 1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            secondValue = gauge.getValue();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pres2.setText(String.valueOf(secondValue));
+                }
+            });
+            try {
+                Thread.sleep(180000, 1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            thirdValue = gauge.getValue();
 
-                    pres1.setText("");
-                    pres2.setText("");
-                    pres3.setText("");
-                    presT1.setText("");
-                    presT2.setText("");
-                    presT3.setText("");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    double leak = Math.round((firstValue - thirdValue)*100)/100.0;
+                    leakageSemi.setText(String.valueOf(leak));
+                }
+            });
+            finalSemi = thirdValue;
+            finalTrailer = finalBoth - finalSemi;
 
-                    firstValue = gauge.getValue();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            pres1.setText(String.valueOf(firstValue));
-                        }
-                    });
-                    TimeCountdownThread timeCountdownThread = new TimeCountdownThread();
-                    timeCountdownThread.start();
-                    try {
-                        Thread.sleep(60000, 1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    secondValue = gauge.getValue();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            pres2.setText(String.valueOf(secondValue));
-                        }
-                    });
-                    try {
-                        Thread.sleep(180000, 1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    thirdValue = gauge.getValue();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            double leak = Math.round((firstValue - thirdValue)*100)/100.0;
-                            leakageSemi.setText(String.valueOf(leak));
-                        }
-                    });
-                    double finalSemi = firstValue - thirdValue;
-                    double finalTrailer = finalBoth - finalSemi;
-
-                    if(finalBoth < (firstValue + thirdValue)*0.95){
-                        if (finalSemi < firstValue*0.95){
-                            resultText = "Semi is leaking.\n";
-                        }
-                        if(finalTrailer < fourthValue*0.95){
-                            resultText = resultText + " Trailer is leaking\n";
-                        }
-                    }
-                    else {
-                        resultText = "No leakage\n";
-                    }
-                    String finalResultText = resultText;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            res_text.setText(finalResultText);
-                        }
-                    });
-
-                    for(int i=0; i<10; ++i){
-                        connectedThread.write("s");
-                        try {pres3.setText(String.valueOf(thirdValue));
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+            if(finalBoth < (firstValue + thirdValue)*0.95){
+                if (finalSemi < firstValue*0.95){
+                    resultText = "Semi is leaking.\n";
+                }
+                if(finalTrailer < fourthValue*0.95){
+                    resultText = resultText + " Trailer is leaking\n";
+                }
+            }
+            else {
+                resultText = "No leakage\n";
+            }
+            String finalResultText = resultText;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    res_text.setText(finalResultText);
                 }
             });
 
+            for(i=0; i<10; ++i){
+                connectedThread.write("s");
+                try {pres3.setText(String.valueOf(thirdValue));
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
         }
     }
