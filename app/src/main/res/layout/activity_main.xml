@@ -46,4 +46,16 @@
         android:shadowDx="0"
         android:shadowDy="0"
         android:shadowRadius="5"/>
+
+    <android.widget.Button
+        android:id="@+id/recordQuery"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="QUERY VEHICLES"
+        android:background="@drawable/buttonshape"
+        android:shadowColor="#6096FF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="5"/>
 </LinearLayout>

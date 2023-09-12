@@ -418,8 +418,8 @@ public class TestSemiActivity extends AppCompatActivity {
             firstValue = gauge.getValue();
             fourthValue = gauge.getValue();
 
-            //while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
-            while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
+            while((fourthValue < secondValue/2*0.95) || (fourthValue > secondValue/2*1.05)){ //4th value: 2nd sensor
+            //while((fourthValue < firstValue*0.95) || (fourthValue > firstValue*1.05)){ //4th value: 2nd sensor
                 res_text.setText("Front pressure is not half of the system pressure!\n");
             }
             runOnUiThread(new Runnable() {
