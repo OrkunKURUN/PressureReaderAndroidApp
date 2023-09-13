@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button semi = findViewById(R.id.testSemi);
         Button full = findViewById(R.id.testBoth);
+        Button query = findViewById(R.id.recordQuery);
 
         semi.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -32,6 +33,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(),TestBothActivity.class);
                 testActivity = 2;
+                startActivity(i);
+            }
+        });
+
+        query.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(),QueryRecordActivity.class);
                 startActivity(i);
             }
         });

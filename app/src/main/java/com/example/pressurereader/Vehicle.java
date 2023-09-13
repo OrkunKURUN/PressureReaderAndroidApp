@@ -4,6 +4,8 @@ public class Vehicle {
     public String plate, id;
     public int vehicleType; //0: Semi, 1: Trailer
     public boolean isLeaking;
+
+    public Vehicle(){}
     public Vehicle(String plate, String id, int vehicleType, boolean isLeaking){
         this.plate = plate;
         this.id = id;
