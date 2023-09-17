@@ -11,24 +11,26 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_weight="1.8"
+        android:layout_weight="1.7"
         android:orientation="horizontal">
 
         <com.ekn.gruzer.gaugelibrary.HalfGauge
             android:id="@+id/pressureGauge"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
         <com.ekn.gruzer.gaugelibrary.FullGauge
             android:id="@+id/timerGauge"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
         <com.ekn.gruzer.gaugelibrary.HalfGauge
             android:id="@+id/pressure2Gauge"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -150,17 +152,12 @@
                     android:id="@+id/textLedStatus"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="5"
+                    android:layout_weight="3"
                     android:fontFamily="monospace"
                     android:text="TextView"
                     android:textColor="#004aad"
                     android:textSize="24sp"
                     android:textStyle="normal" />
-
-                <Space
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.3" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -420,7 +417,61 @@
                 android:textColor="#004aad"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/plateInputSemi"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="Type semi plate"
+                    android:inputType="text" />
+
+                <android.widget.Button
+                    android:id="@+id/saveSemiRecord"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/buttonshape"
+
+                    android:shadowColor="#6096FF"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="5"
+                    android:text="SAVE SEMI RESULT"
+                    android:textColor="#EFFFF8" />
+
+                <EditText
+                    android:id="@+id/plateInputTrailer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="Type trailer plate"
+                    android:inputType="text" />
+
+                <android.widget.Button
+                    android:id="@+id/saveTrailerRecord"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7"
+                    android:background="@drawable/buttonshape"
+
+                    android:shadowColor="#6096FF"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="5"
+                    android:text="SAVE TRAILER RESULT"
+                    android:textColor="#EFFFF8" />
+            </LinearLayout>
         </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

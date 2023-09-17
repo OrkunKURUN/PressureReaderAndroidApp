@@ -15,13 +15,20 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ekn.gruzer.gaugelibrary.FullGauge;
 import com.ekn.gruzer.gaugelibrary.HalfGauge;
 import com.ekn.gruzer.gaugelibrary.Range;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,7 +73,8 @@ public class TestBothActivity extends AppCompatActivity {
     public Range range3;
     public Button contButton;
     public Button buttonTest;
-    public boolean contTest;
+    public boolean contTest, isSemiLeaking, isTrailerLeaking;
+    private DatabaseReference rDatabase, rDatabase2, rDatabase3;
 
     public static BluetoothSocket getMmSocket() {
         return mmSocket;
@@ -100,6 +108,10 @@ public class TestBothActivity extends AppCompatActivity {
         leakage = findViewById(R.id.leakage);
         leakageSemi = findViewById(R.id.leakageSemi);
         timeGauge = findViewById(R.id.timerGauge);
+        EditText plateSemi = findViewById(R.id.plateInputSemi);
+        EditText plateTrailer = findViewById(R.id.plateInputTrailer);
+        Button saveTrailer = findViewById(R.id.saveTrailerRecord);
+        Button saveSemi = findViewById(R.id.saveSemiRecord);
 
         //Initializing gauge
         gauge = findViewById(R.id.pressureGauge);
@@ -248,6 +260,38 @@ public class TestBothActivity extends AppCompatActivity {
                 contTest = false;
                 testLeakageThread = new TestLeakageThread();
                 testLeakageThread.start();
+            }
+        });
+
+        rDatabase = FirebaseDatabase.getInstance().getReference().child("vehicles");
+        saveSemi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String sPlate = plateSemi.getText().toString();
+
+                /*addVehicleThread add1 = new addVehicleThread(sPlate, 0, isSemiLeaking);
+                addVehicleThread add2 = new addVehicleThread(tPlate, 1, isTrailerLeaking);
+                add1.start();
+                add2.start();*/
+
+                addVehicle(sPlate, 0, isSemiLeaking);
+
+            }
+        });
+        saveTrailer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String sPlate = plateSemi.getText().toString();
+                String tPlate = plateTrailer.getText().toString();
+
+                /*addVehicleThread add1 = new addVehicleThread(sPlate, 0, isSemiLeaking);
+                addVehicleThread add2 = new addVehicleThread(tPlate, 1, isTrailerLeaking);
+                add1.start();
+                add2.start();*/
+
+                addVehicle(sPlate, 0, isSemiLeaking);
+                addVehicle(tPlate, 1, isTrailerLeaking);
+
             }
         });
 
@@ -514,14 +558,18 @@ public class TestBothActivity extends AppCompatActivity {
 
             if(finalBoth < (firstValue + thirdValue)*0.95){
                 if (finalSemi < firstValue*0.95){
-                    resultText = "Semi is leaking.\n";
+                    resultText = "Semi is leaking!\n";
+                    isSemiLeaking = true;
                 }
                 if(finalTrailer < fourthValue*0.95){
-                    resultText = resultText + " Trailer is leaking\n";
+                    resultText = resultText + " Trailer is leaking!";
+                    isTrailerLeaking = true;
                 }
             }
             else {
-                resultText = "No leakage\n";
+                resultText = "No leakage";
+                isSemiLeaking = false;
+                isTrailerLeaking = false;
             }
             String finalResultText = resultText;
             runOnUiThread(new Runnable() {
@@ -568,6 +616,54 @@ public class TestBothActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+    /*public class addVehicleThread extends Thread {
+        private String plate;
+        private int vehicleType;
+        private boolean isLeaking;
+        addVehicleThread(String plate, int vehicleType, boolean isLeaking){
+            this.plate = plate;
+            this.vehicleType = vehicleType;
+            this.isLeaking = isLeaking;
+        }
+        public void run(){
+            rDatabase2 = rDatabase.child(plate);
+            String id = rDatabase2.push().getKey();//getting unique id
+
+            Vehicle vehicle = new Vehicle(plate, id, vehicleType, isLeaking);
+
+            ValueEventListener listener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    rDatabase2.setValue(vehicle);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.w("TAG", "loadPost:onCancelled", error.toException());
+                }
+            };
+            rDatabase2.addValueEventListener(listener);
+        }
+    }*/
+    public void addVehicle(String plate, int vehicleType, boolean isLeaking){
+        rDatabase2 = rDatabase.child(plate);
+        String id = rDatabase2.push().getKey();//getting unique id
+
+        Vehicle vehicle = new Vehicle(plate, id, vehicleType, isLeaking);
+
+        ValueEventListener listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                rDatabase2.setValue(vehicle);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w("TAG", "loadPost:onCancelled", error.toException());
+            }
+        };
+        rDatabase2.addValueEventListener(listener);
     }
 }
 

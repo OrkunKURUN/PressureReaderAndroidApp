@@ -372,7 +372,7 @@
                     android:inputType="text" />
 
                 <android.widget.Button
-                    android:id="@+id/saveRecord"
+                    android:id="@+id/saveTrailerRecord"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -382,7 +382,7 @@
                     android:shadowDx="0"
                     android:shadowDy="0"
                     android:shadowRadius="5"
-                    android:text="Button"
+                    android:text="SAVE RESULT"
                     android:textColor="#EFFFF8" />
             </LinearLayout>
 

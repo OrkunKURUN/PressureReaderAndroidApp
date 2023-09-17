@@ -98,7 +98,7 @@ public class TestSemiActivity extends AppCompatActivity {
         leakageRatio = findViewById(R.id.leakInitRatio);
         timeGauge = findViewById(R.id.timerGauge);
         EditText plate = findViewById(R.id.plateInput);
-        Button save = findViewById(R.id.saveRecord);
+        Button save = findViewById(R.id.saveTrailerRecord);
 
         //Initializing gauge
         gauge = findViewById(R.id.pressureGauge);
